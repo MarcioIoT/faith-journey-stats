@@ -177,7 +177,7 @@ function Row({ s, tab }: { s: Student; tab: Tab }) {
             return (
               <span
                 key={c.id}
-                title={`${c.label}${done ? ` — ${s.cursos[c.id].join(", ")}` : " — não fez"}`}
+                title={`${c.label}${done ? ` — ${(s.cursos[c.id] ?? []).join(", ")}` : " — não fez"}`}
                 className={`flex h-6 w-6 items-center justify-center rounded text-[10px] font-bold ${
                   done ? (c.order ? "bg-primary text-primary-foreground" : "bg-gold text-primary-foreground") : "border border-dashed text-muted-foreground"
                 } ${c.order ? "" : "ml-1.5"}`}
