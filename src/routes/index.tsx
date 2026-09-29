@@ -61,10 +61,15 @@ function Dashboard() {
         <p className="text-sm text-muted-foreground">{rows.length} matrículas registradas</p>
       </header>
 
-      <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         <Stat label="Alunos únicos" value={students.length} />
         <Stat label="Membros" value={membros} />
-        <Stat label="Concluíram as 6 classes" value={completos} highlight />
+        <Stat
+          label="Concluíram as 5 classes principais"
+          value={students.filter((s) => MAIN.slice(0, 5).every((c) => s.cursos[c.id])).length}
+          highlight
+        />
+        <Stat label="Concluíram as 6 classes" value={completos} />
         <Stat label="Prontos para próxima" value={students.filter((s) => s.proxima && s.progresso > 0).length} />
       </section>
 
