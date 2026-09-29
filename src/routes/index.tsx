@@ -37,7 +37,9 @@ function Dashboard() {
   const [q, setQ] = useState("");
   const [curso, setCurso] = useState("todos");
   const [vinculo, setVinculo] = useState("todos");
+  const [grupo, setGrupo] = useState<Grupo>("todos");
 
+  const cinco = (s: Student) => MAIN.slice(0, 5).every((c) => s.cursos[c.id]);
   const counts = COURSES.map((c) => ({ c, n: students.filter((s) => s.cursos[c.id]).length }));
   const max = Math.max(1, ...counts.map((x) => x.n));
   const completos = students.filter((s) => s.progresso === 6).length;
@@ -46,10 +48,21 @@ function Dashboard() {
   const filtered = students.filter((s) => {
     if (q && !norm(s.nome).includes(norm(q)) && !s.celular.includes(q)) return false;
     if (vinculo !== "todos" && s.vinculo !== vinculo) return false;
+    if (grupo === "membros" && s.vinculo !== "Membro") return false;
+    if (grupo === "cinco" && !cinco(s)) return false;
+    if (grupo === "seis" && s.progresso !== 6) return false;
     if (tab === "alunos") return curso === "todos" || !!s.cursos[curso];
     if (!s.proxima || s.progresso === 0) return false;
     return curso === "todos" || s.proxima.id === curso;
   });
+
+  const pick = (g: Grupo, t: Tab = "alunos") => {
+    const same = grupo === g && tab === t;
+    setGrupo(same ? "todos" : g);
+    setTab(t);
+    setCurso("todos");
+    if (!same) document.getElementById("lista")?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-10 sm:px-8">
@@ -58,19 +71,26 @@ function Dashboard() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Caminho do discipulado</p>
           <h1 className="mt-2 text-4xl font-bold text-primary sm:text-5xl">Painel das Classes</h1>
         </div>
-        <p className="text-sm text-muted-foreground">{rows.length} matrículas registradas</p>
+        <p className="text-sm text-muted-foreground">{rows.length} matrículas registradas · clique nos quadros para ver a lista</p>
       </header>
 
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-        <Stat label="Alunos únicos" value={students.length} />
-        <Stat label="Membros" value={membros} />
+        <Stat label="Alunos únicos" value={students.length} active={grupo === "todos" && tab === "alunos"} onClick={() => pick("todos")} />
+        <Stat label="Membros" value={membros} active={grupo === "membros"} onClick={() => pick("membros")} />
         <Stat
           label="Concluíram as 5 classes principais"
-          value={students.filter((s) => MAIN.slice(0, 5).every((c) => s.cursos[c.id])).length}
+          value={students.filter(cinco).length}
           highlight
+          active={grupo === "cinco"}
+          onClick={() => pick("cinco")}
         />
-        <Stat label="Concluíram as 6 classes" value={completos} />
-        <Stat label="Prontos para próxima" value={students.filter((s) => s.proxima && s.progresso > 0).length} />
+        <Stat label="Concluíram as 6 classes" value={completos} active={grupo === "seis"} onClick={() => pick("seis")} />
+        <Stat
+          label="Prontos para próxima"
+          value={students.filter((s) => s.proxima && s.progresso > 0).length}
+          active={tab === "convidar" && grupo === "todos"}
+          onClick={() => pick("todos", "convidar")}
+        />
       </section>
 
       <section className="mt-8 rounded-xl border bg-card p-6">
@@ -96,7 +116,7 @@ function Dashboard() {
         </div>
       </section>
 
-      <section className="mt-8 rounded-xl border bg-card">
+      <section id="lista" className="mt-8 scroll-mt-4 rounded-xl border bg-card">
         <div className="flex flex-wrap items-center gap-3 border-b p-4">
           <div className="flex rounded-lg bg-muted p-1">
             {(["alunos", "convidar"] as Tab[]).map((t) => (
@@ -157,12 +177,31 @@ function Dashboard() {
   );
 }
 
-function Stat({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
+type Grupo = "todos" | "membros" | "cinco" | "seis";
+
+function Stat({
+  label,
+  value,
+  highlight,
+  active,
+  onClick,
+}: {
+  label: string;
+  value: number;
+  highlight?: boolean;
+  active?: boolean;
+  onClick?: () => void;
+}) {
   return (
-    <div className={`rounded-xl border p-5 ${highlight ? "bg-primary text-primary-foreground" : "bg-card"}`}>
+    <button
+      onClick={onClick}
+      className={`rounded-xl border p-5 text-left transition hover:-translate-y-0.5 hover:shadow-md ${
+        highlight ? "bg-primary text-primary-foreground" : "bg-card"
+      } ${active ? "ring-2 ring-gold ring-offset-2 ring-offset-background" : ""}`}
+    >
       <p className={`text-xs font-semibold uppercase tracking-wider ${highlight ? "opacity-80" : "text-muted-foreground"}`}>{label}</p>
       <p className="mt-2 font-display text-4xl font-bold tabular-nums">{value}</p>
-    </div>
+    </button>
   );
 }
 
