@@ -57,7 +57,11 @@ function Dashboard() {
   });
 
   const exportarCSV = () => {
-    const cell = (v: string | number) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const clean = (v: string | number) => {
+      const t = String(v ?? "").trim();
+      return t === "NULL" || t === "null" ? "" : t;
+    };
+    const cell = (v: string | number) => `"${clean(v).replace(/"/g, '""')}"`;
     const head = ["Aluno", "Vínculo", "E-mail", "Celular", ...COURSES.map((c) => c.short), "Classes concluídas", "Próxima classe"];
     const lines = filtered.map((s) =>
       [
