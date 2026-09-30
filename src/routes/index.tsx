@@ -171,6 +171,13 @@ function Dashboard() {
             <option value="Membro">Membro</option>
             <option value="Congregado">Congregado</option>
           </select>
+          <button
+            onClick={exportarCSV}
+            disabled={!filtered.length}
+            className="h-9 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
+          >
+            Exportar CSV ({filtered.length})
+          </button>
         </div>
         <p className="px-4 pt-3 text-xs text-muted-foreground">
           {filtered.length} aluno(s)
