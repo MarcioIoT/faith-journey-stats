@@ -56,6 +56,37 @@ function Dashboard() {
     return curso === "todos" || s.proxima.id === curso;
   });
 
+  const exportarCSV = () => {
+    const clean = (v: string | number) => {
+      const t = String(v ?? "").trim();
+      return t === "NULL" || t === "null" ? "" : t;
+    };
+    const cell = (v: string | number) => `"${clean(v).replace(/"/g, '""')}"`;
+    const head = ["Aluno", "Vínculo", "E-mail", "Celular", ...COURSES.map((c) => c.short), "Classes concluídas", "Próxima classe"];
+    const lines = filtered.map((s) =>
+      [
+        s.nome,
+        s.vinculo || "",
+        s.email || "",
+        s.celular || "",
+        ...COURSES.map((c) => (s.cursos[c.id] ? "Sim" : "Não")),
+        s.progresso,
+        s.proxima ? `${s.proxima.order}º ${s.proxima.short}` : "",
+      ]
+        .map(cell)
+        .join(";"),
+    );
+    const csv = "\uFEFF" + [head.map(cell).join(";"), ...lines].join("\r\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `alunos-classes-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   const pick = (g: Grupo, t: Tab = "alunos") => {
     const same = grupo === g && tab === t;
     setGrupo(same ? "todos" : g);
@@ -146,6 +177,13 @@ function Dashboard() {
             <option value="Membro">Membro</option>
             <option value="Congregado">Congregado</option>
           </select>
+          <button
+            onClick={exportarCSV}
+            disabled={!filtered.length}
+            className="h-9 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
+          >
+            Exportar CSV ({filtered.length})
+          </button>
         </div>
         <p className="px-4 pt-3 text-xs text-muted-foreground">
           {filtered.length} aluno(s)
