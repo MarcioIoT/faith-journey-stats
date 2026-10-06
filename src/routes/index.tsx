@@ -24,7 +24,7 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(alunosQuery),
   component: Dashboard,
   errorComponent: ({ error }) => (
-    <div className="p-10 text-center text-destructive">Não foi possível carregar a planilha: {error.message}</div>
+    <div className="p-10 text-center text-destructive">Não foi possível carregar a planilha: {(error as Error).message}</div>
   ),
 });
 

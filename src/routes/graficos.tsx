@@ -27,7 +27,7 @@ export const Route = createFileRoute("/graficos")({
   loader: ({ context }) => context.queryClient.ensureQueryData(alunosQuery),
   component: Graficos,
   errorComponent: ({ error }) => (
-    <div className="p-10 text-center text-destructive">Não foi possível carregar a planilha: {error.message}</div>
+    <div className="p-10 text-center text-destructive">Não foi possível carregar a planilha: {(error as Error).message}</div>
   ),
 });
 
@@ -47,7 +47,7 @@ function Graficos() {
 
   const funil = COURSES.map((c, i) => {
     const n = students.filter((s) => s.cursos[c.id]).length;
-    const prev = i > 0 && c.order && principais.includes(c) ? students.filter((s) => s.cursos[COURSES[i - 1].id]).length : 0;
+    const prev = i > 0 && c.order && principais.includes(c) ? students.filter((s) => s.cursos[COURSES[i - 1]!.id]).length : 0;
     return { nome: c.short, alunos: n, comp: !principais.includes(c), conv: prev ? Math.round((n / prev) * 100) : null };
   });
 
