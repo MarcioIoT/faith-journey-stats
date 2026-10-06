@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { getAlunos } from "@/lib/sheets.functions";
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(alunosQuery),
   component: Dashboard,
   errorComponent: ({ error }) => (
-    <div className="p-10 text-center text-destructive">Não foi possível carregar a planilha: {error.message}</div>
+    <div className="p-10 text-center text-destructive">Não foi possível carregar a planilha: {(error as Error).message}</div>
   ),
 });
 
@@ -102,7 +102,12 @@ function Dashboard() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Caminho do discipulado</p>
           <h1 className="mt-2 text-4xl font-bold text-primary sm:text-5xl">Painel das Classes</h1>
         </div>
-        <p className="text-sm text-muted-foreground">{rows.length} matrículas registradas · clique nos quadros para ver a lista</p>
+        <div className="flex flex-col items-end gap-2">
+          <Link to="/graficos" className="inline-flex h-9 items-center rounded-md bg-gold px-4 text-sm font-semibold text-primary hover:opacity-90">
+            📊 Ver gráficos interativos
+          </Link>
+          <p className="text-sm text-muted-foreground">{rows.length} matrículas registradas · clique nos quadros para ver a lista</p>
+        </div>
       </header>
 
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-5">
